@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import yfinance as yf
 from sklearn.linear_model import LinearRegression
-from sklearn.svm import SVR
 from sklearn.model_selection import train_test_split
 
 
@@ -29,42 +28,13 @@ def PredLir(df, n):
 
     x_forecast = np.array(df.drop(['Prediction'], axis=1))[-days:]
     y_pred = model.predict(x_forecast)
+    dc = 1
+    for i in y_pred:
+        st.write("Day {} Predicted price: {}".format(dc, round(i, 2)))
+        dc += 1
 
-    a = np.array(df['Close'].values)
-    b = np.array(y_pred)
-    v = np.hstack((a, b))
-
-    plt.figure(figsize=(16, 8))
-    plt.ylabel('Price')
-    plt.plot(v, label='Predicted Price', linewidth=4)
-    plt.plot(a, label='Current Price', linewidth=4)
-    plt.legend()
-
-    st.pyplot(plt.gcf())
-
-
-def PredSvr(df, n):
-    days = int(n)
-    df = df[['Close']]
-    df['Prediction'] = df[['Close']].shift(-days)
-
-    x = np.array(df.drop(['Prediction'], axis=1))
-    x = x[:-days]
-
-    y = np.array(df['Prediction'])
-    y = y[:-days]
-
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
-    model = SVR()
-    model.fit(x_train, y_train)
-    model_conf = model.score(x_test, y_test)
-
-    st.write("Support Vector Regression Prediction accuracy: %{}".format(round((model_conf*100), 2)))
-
-    x_forecast = np.array(df.drop(['Prediction'], axis=1))[-days:]
-    y_pred = model.predict(x_forecast)
-    
-    a = np.array(df['Close'].values)
+    sh_df = df.tail(30)
+    a = np.array(sh_df['Close'].values)
     b = np.array(y_pred)
     v = np.hstack((a, b))
 
@@ -91,7 +61,6 @@ def Candel(df):
             )
         ]
     )
-    fig.update_layout(xaxis_rangeslider_visible=False)
     return fig
 
 
@@ -124,17 +93,12 @@ def CalcMFI(df, period):
 
     mfi = 100*(np.array(positive_mf)/(np.array(positive_mf)+np.array(negative_mf)))
 
-    new_data = pd.DataFrame()
-    new_data['MFI'] = mfi
+    plt.figure(figsize=(16, 4))
+    plt.plot(mfi, color='b', alpha=0.7)
+    plt.axhline(20, linestyle='--', color='r')
+    plt.axhline(80, linestyle='--', color='r')
 
-    plt.style.use('fivethirtyeight')
-    new_fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=(16, 8))
-    ax1.plot(df['Close'], label="Close Price")
-    ax2.plot(new_data['MFI'], label='MFI', color='g', alpha=0.5)
-    ax2.axhline(20, linestyle='--', color='r')
-    ax2.axhline(80, linestyle='--', color='r')
-
-    st.pyplot(new_fig)
+    st.pyplot(plt.gcf())
 
 
 def CalcRSI(df, period):
@@ -152,18 +116,12 @@ def CalcRSI(df, period):
     RS = avg_gain / avg_loss
     RSI = 100.0 - (100.0 / (1.0 + RS))
 
-    new_data = pd.DataFrame()
-    new_data['Close'] = df['Close']
-    new_data['RSI'] = RSI
+    plt.figure(figsize=(16, 4))
+    plt.plot(RSI, color='g', alpha=0.7)
+    plt.axhline(20, linestyle='--', color='r')
+    plt.axhline(80, linestyle='--', color='r')
 
-    plt.style.use('fivethirtyeight')
-    new_fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=(16, 8))
-    ax1.plot(new_data['Close'], label="Close Price")
-    ax2.plot(new_data['RSI'], label='RSI', color='g', alpha=0.5)
-    ax2.axhline(20, linestyle='--', color='r')
-    ax2.axhline(80, linestyle='--', color='r')
-
-    st.pyplot(new_fig)
+    st.pyplot(plt.gcf())
 
 
 def CalcMACD(df, p_first_val, p_second_val):
@@ -281,37 +239,24 @@ st.set_page_config(
 )
 
 
-periods = {
-    '1D': '1d',
-    '5D': '5d',
-    '1M': '1mo',
-    '3M': '3mo',
-    '6M': '6mo',
-    '1Y': '1y',
-    '2Y': '2y',
-    '5Y': '5y',
-    '10Y': '10y',
-    'Max': 'max'
-}
-
 def get_input():
     stock_symbol = st.sidebar.text_input("Symbol:", "AAPL")
-    numb = st.sidebar.selectbox("Time Period:", options=periods, index=2)
-    return stock_symbol, numb
+    return stock_symbol
 
 
-def get_data(symbol, n):
+def get_data(symbol):
     data = yf.Ticker(symbol)
     if data:
-        df = data.history(period=periods[n])
+        df = data.history(period='max')
+        s_df = yf.download(symbol, period='1d', interval='15m')
         info = data.info
-        return df, info
+        return df, s_df, info
     else:
         return 0, None
 
 
-symbol, n = get_input()
-df, info = get_data(symbol.upper(), n)
+symbol = get_input()
+df, s_df, info = get_data(symbol.upper())
 
 if df is not None:
     try:
@@ -331,59 +276,15 @@ if df is not None:
     except:
         pass
 
-    st.plotly_chart(Candel(df), use_container_width=True)
+    st.plotly_chart(Candel(s_df), use_container_width=True)
 
-    pred = st.sidebar.selectbox("Prediction", options=('LIR Prediction', 'SVR Prediction'))
-    if pred == 'LIR Prediction':
-        st.write("----")
-        st.header("Prediction")
-        num_days = st.text_input("How many days do you want to be predicted?", 1)
-        PredLir(df, num_days)
-    elif pred == 'SVR Prediction':
-        st.write("----")
-        st.header("Prediction")
-        num_days = st.text_input("How many days do you want to be predicted?", 1)
-        PredSvr(df, num_days)
+    st.write("----")
+    st.header("Prediction")
+    num_days = st.text_input("How many days do you want to be predicted?", 1)
+    PredLir(df, num_days)
 
-
-    ind = st.sidebar.selectbox("Indicators", options=('MFI', 'RSI', 'MACD', 'MAVG'))
-    if ind == 'MFI':
-        day_period = {
-            '1 D': 1,
-            '3 D': 3,
-            '7 D': 7,
-            '14 D': 14,
-            '30 D': 30,
-            '60 D': 60,
-            '100 D': 100,
-            '180 D': 180,
-            '1 Year': 365
-        }
-        st.write("----")
-        st.header("MFI Indicator")
-        period_selection = st.selectbox("Time Period", options=day_period, index=2)
-        period = day_period[period_selection]
-        CalcMFI(df, period)
-
-    elif ind == 'RSI':
-        day_period = {
-            '1 D': 1,
-            '3 D': 3,
-            '7 D': 7,
-            '14 D': 14,
-            '30 D': 30,
-            '60 D': 60,
-            '100 D': 100,
-            '180 D': 180,
-            '1 Year': 365
-        }
-        st.write("----")
-        st.header("RSI Indicator")
-        period_selection = st.selectbox("Time Period", options=day_period, index=2)
-        period = day_period[period_selection]
-        CalcRSI(df, period)
-
-    elif ind == 'MACD':
+    ind = st.sidebar.selectbox("Indicators", options=('MACD', 'MAVG'))
+    if ind == 'MACD':
         st.write("----")
         st.header("MACD Indicator")
         sma_period = {
@@ -394,11 +295,13 @@ if df is not None:
         sma_period_selection = st.selectbox("Time Period", options=sma_period)
         p_first_val = sma_period[sma_period_selection][0]
         p_second_val = sma_period[sma_period_selection][1]
-        CalcMACD(df, p_first_val, p_second_val)
+        CalcMACD(df.tail(3*p_second_val), p_first_val, p_second_val)
+        CalcMFI(df.tail(3*p_second_val), p_first_val)
+        CalcRSI(df.tail(3*p_second_val), p_first_val)
 
     elif ind == 'MAVG':
         st.write("----")
-        st.header("MACD Indicator")
+        st.header("MAVG Indicator")
         sma_period = {
             '12-26 D': (12, 26),
             '30-100 D': (30, 100),
@@ -407,7 +310,9 @@ if df is not None:
         sma_period_selection = st.selectbox("Time Period", options=sma_period)
         p_first_val = sma_period[sma_period_selection][0]
         p_second_val = sma_period[sma_period_selection][1]
-        CalcMA(df, p_first_val, p_second_val)
+        CalcMA(df.tail(3*p_second_val), p_first_val, p_second_val)
+        CalcMFI(df.tail(3*p_second_val), p_first_val)
+        CalcRSI(df.tail(3*p_second_val), p_first_val)
 
 else:
     st.error("Symbol is Wrong !!!")
