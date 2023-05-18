@@ -8,6 +8,22 @@ from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 
 
+def Candel(df):
+    fig = go.Figure(
+        data = [
+            go.Candlestick(
+                x = df.index,
+                open = df['Open'],
+                high = df['High'],
+                low = df['Low'],
+                close = df['Close'],
+            )
+        ]
+    )
+    fig.update_layout(xaxis_rangeslider_visible=False)
+    return fig
+
+
 def PredLir(df, n):
     days = int(n)
     df = df[['Close']]
@@ -45,23 +61,6 @@ def PredLir(df, n):
     plt.legend()
 
     st.pyplot(plt.gcf())
-
-
-def Candel(df):
-    fig = go.Figure(
-        data = [
-            go.Candlestick(
-                x = df.index,
-                open = df['Open'],
-                high = df['High'],
-                low = df['Low'],
-                close = df['Close'],
-                increasing_line_color = 'green',
-                decreasing_line_color = 'red'
-            )
-        ]
-    )
-    return fig
 
 
 def CalcMFI(df, period):
