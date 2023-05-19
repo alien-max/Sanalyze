@@ -17,6 +17,8 @@ def Candel(df):
                 high = df['High'],
                 low = df['Low'],
                 close = df['Close'],
+                increasing_line_color= 'green',
+                decreasing_line_color= 'red'
             )
         ]
     )
