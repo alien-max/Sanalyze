@@ -12,5 +12,5 @@ streamlit run Main.py
 ```
 
 # Login
-Default Username: admin
+Default Username: admin<br>
 Default Password: admin
