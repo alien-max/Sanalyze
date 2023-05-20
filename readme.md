@@ -10,3 +10,7 @@ pip install -r requirements.txt
 ```
 streamlit run Main.py
 ```
+
+# Login
+Default Username: admin
+Default Password: admin
