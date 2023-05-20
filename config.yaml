@@ -1,0 +1,17 @@
+credentials:
+  usernames:
+    admin:
+      email: admin@site.com
+      name: admin
+      password: $2b$12$yOZS2Ic/CuCdcMLh49yiD.OBuXPYWMN7TSuz/ifN38jAsh68faF0i
+    mohi:
+      email: mohi@site.com
+      name: mohi
+      password: $2b$12$snKE7Kz09tlBDwA3sZF2g.nNP0tzYwJEyg6eDMiMmYHdJIyLzB9t.
+cookie:
+  expiry_days: 30
+  key: oubi-UkN0Bq5jZlx8Ek3U1PeX9IsAhJV_FPYDy8sjkE=
+  name: Sanalyze
+preauthorized:
+  emails:
+    - admin@site.com
