@@ -36,25 +36,8 @@ if authentication_status:
     symbol = get_input()
     df, s_df, info = get_data(symbol.upper())
     if df is not None:
-        try:
-            st.header(info['longName'])
-        except:
-            pass
-        try:
-            st.write(info['country'])
-        except:
-            pass
-        try:
-            st.write(info['sector'])
-        except:
-            pass
-        try:
-            st.write(info['website'])
-        except:
-            pass
-
+        st.header(info['longName'])
         st.plotly_chart(Candel(s_df), use_container_width=True)
-
         st.write("----")
         st.header("Prediction")
         num_days = st.text_input("How many days do you want to be predicted?", 1)
