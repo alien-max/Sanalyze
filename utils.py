@@ -114,6 +114,7 @@ def CalcMFI(df, period):
     plt.plot(mfi, color='b', alpha=0.7)
     plt.axhline(20, linestyle='--', color='r')
     plt.axhline(80, linestyle='--', color='r')
+    plt.title('MFI')
 
     st.pyplot(plt.gcf())
 
@@ -137,6 +138,7 @@ def CalcRSI(df, period):
     plt.plot(RSI, color='g', alpha=0.7)
     plt.axhline(20, linestyle='--', color='r')
     plt.axhline(80, linestyle='--', color='r')
+    plt.title('RSI')
 
     st.pyplot(plt.gcf())
 
