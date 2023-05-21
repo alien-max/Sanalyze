@@ -64,7 +64,7 @@ def PredLir(df, n):
     y_pred = model.predict(x_forecast)
     dc = 1
     for i in y_pred:
-        st.write("Day {} Predicted price: {}".format(dc, round(i, 2)))
+        st.write("Day {} Predicted price: {}".format(dc, round(i, 4)))
         dc += 1
 
     sh_df = df.tail(30)
