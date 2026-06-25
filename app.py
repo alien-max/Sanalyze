@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-
 from data.yfinance_loader import load_ohlcv, get_symbol_info
 from features.engineering import prepare_dataset, get_feature_columns
 from models.ml_models import (
@@ -13,6 +12,8 @@ from visualization.charts import (
     plot_feature_importance, build_summary_table, build_metrics_table,
 )
 
+POPULAR_SYMBOLS = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'NVDA', 'META', 'NFLX', 'AMD', 'INTC', 'PLTR', 'UBER', 'COIN', 'JPM', 'V', 'WMT', 'DIS', 'BA', 'NKE', 'PYPL', 'GC=F', 'SI=F', 'CL=F', 'BZ=F', 'NG=F', 'HG=F', 'ZC=F', 'ZS=F', 'ZW=F', 'KC=F', 'CT=F', 'CC=F', 'LE=F', 'HE=F', 'ES=F', 'NQ=F', 'YM=F', 'RTY=F', 'DX=F', 'ZT=F', 'BTC-USD', 'ETH-USD', 'BNB-USD', 'SOL-USD', 'XRP-USD', 'ADA-USD', 'DOGE-USD', 'TRX-USD', 'AVAX-USD', 'DOT-USD', 'LINK-USD', 'MATIC-USD', 'LTC-USD', 'BCH-USD', 'ATOM-USD', 'UNI-USD', 'ETC-USD', 'XLM-USD', 'APT-USD', 'PEPE-USD']
+
 st.set_page_config(
     page_title="Sanalyze",
     page_icon="📈",
@@ -20,34 +21,19 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-st.markdown("""
-<style>
-[data-testid="stSidebar"] { background: #0f1117; }
-.metric-card {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.09);
-    border-radius: 10px;
-    padding: 14px 18px;
-    text-align: center;
-}
-.metric-card .val { font-size: 1.6rem; font-weight: 600; }
-.metric-card .lbl { font-size: 0.75rem; color: #888; margin-top: 2px; }
-.up   { color: #1D9E75; }
-.down { color: #D85A30; }
-div[data-testid="stDataFrame"] table { font-size: 0.82rem; }
-</style>
-""", unsafe_allow_html=True)
-
 with st.sidebar:
     st.title("📈 Sanalyze")
     st.caption("ML-powered price & direction forecasting")
     st.divider()
 
-    symbol = st.text_input(
+    symbol = st.selectbox(
         "Ticker symbol",
-        value="AAPL",
-        help="Examples: AAPL, BTC-USD, EURUSD=X, TSLA, NVDA",
-    ).upper().strip()
+        options=POPULAR_SYMBOLS,
+        index=None,
+        accept_new_options=True,
+        placeholder="Type symbol... (AAPL, BTC-USD, TSLA)"
+    )
+    symbol = (symbol or "").upper().strip()
     horizon = st.slider("Forecast horizon (days)", min_value=1, max_value=30, value=7, step=1,)
 
     st.divider()
